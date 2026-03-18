@@ -3,7 +3,7 @@ numpy
 scikit-learn
 optuna
 joblib
-streamlit
+streamlit==1.32.0
 sqlalchemy
 matplotlib
 seaborn
