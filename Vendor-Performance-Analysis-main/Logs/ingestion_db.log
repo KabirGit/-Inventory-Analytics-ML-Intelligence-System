@@ -1,0 +1,8 @@
+2025-07-06 13:06:48 - INFO - 🚀 Starting CSV ingestion
+2025-07-06 13:06:53 - INFO - ✅ Ingested table: begin_inventory
+2025-07-06 13:07:00 - INFO - ✅ Ingested table: end_inventory
+2025-07-06 13:08:53 - INFO - ✅ Ingested table: purchases
+2025-07-06 13:08:54 - INFO - ✅ Ingested table: purchase_prices
+2025-07-06 13:21:20 - INFO - ✅ Ingested table: sales
+2025-07-06 13:21:23 - INFO - ✅ Ingested table: vendor_invoice
+2025-07-06 13:21:23 - INFO - 🏁 Ingestion complete in 14.58 minutes
