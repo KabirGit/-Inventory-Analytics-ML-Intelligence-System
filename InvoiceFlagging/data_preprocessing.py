@@ -1,12 +1,10 @@
 import sqlite3
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
+import numpy as np
 import joblib
-from sklearn.preprocessing import StandardScaler,MinMaxScaler
-from sklearn.model_selection import train_test_split
-import os
+from sklearn.preprocessing import StandardScaler, RobustScaler
 from config import DATA_PATH, MODEL_DIR
+
 def load_data():
     conn=sqlite3.connect(str(DATA_PATH))
     query=("""
@@ -37,26 +35,25 @@ def load_data():
     conn.close()
     return df
 
-def create_invoice_risk_label(row):
-    if (abs(row["invoice_dollars"]-row["total_dollars"])>5):
-        return 1
-    if row["average_receiving_delay"]>10:
-        return 1
-    return 0
-
-def apply_labels(df):
-    df["flag_invoice"]=df.apply(create_invoice_risk_label,axis=1)
-    return df
-
-def split_data(df,features,target):
-    X=df[features]
-    y=df[target]
-    return train_test_split(X,y,test_size=0.2)
-
-def scale_features(xtrain,xtest,scaler_path):
-    scaler=StandardScaler()
-    xtrain_scaled=scaler.fit_transform(xtrain)
-    xtest_scaled=scaler.transform(xtest)
+def prepare_and_scale(df):
+    """Prepare features and scale them. Returns X_scaled, feature_names, scaler.
+    
+    Features include:
+    - Original 5: invoice_quantity, invoice_dollars, total_quantity, total_dollars, average_receiving_delay
+    - Added: days_po_to_invoice, payment_delay (temporal patterns in invoice processing)
+    
+    Using RobustScaler for heavy right-skew (skewness > 4 for quantity/dollar features).
+    """
+    features = ['invoice_quantity', 'invoice_dollars', 'total_quantity', 'total_dollars',
+                'average_receiving_delay', 'days_po_to_invoice', 'payment_delay']
+    X = df[features].fillna(0)
+    
+    # RobustScaler: uses median and IQR, robust to outliers in skewed data
+    scaler = RobustScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    # Save scaler
     MODEL_DIR.mkdir(exist_ok=True)
     joblib.dump(scaler, MODEL_DIR / "scaler.pkl")
-    return xtrain_scaled,xtest_scaled
+    
+    return X_scaled, features, scaler
